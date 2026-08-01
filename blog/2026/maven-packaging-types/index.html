@@ -1,0 +1,332 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Maven Packaging 类型详解 | Tangerine </title> <meta name="author" content="Tangerine "> <meta name="description" content="介绍 Maven 中不同的 packaging 类型及其用途"> <meta name="keywords" content="个人博客, 笔记, 回顾记录"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/tangerine-docs/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/tangerine-docs/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%F0%9F%8D%8A&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/tangerine-docs/assets/css/main.css?v=e272beb2a356f3d9abedbe97e457f5c2"> <link rel="canonical" href="https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/maven-packaging-types/"> <script src="/tangerine-docs/assets/js/theme.js?v=7af685e2ba20b37fef545c97b8064050"></script> <link defer rel="stylesheet" href="/tangerine-docs/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/tangerine-docs/"> Tangerine </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/tangerine-docs/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/tangerine-docs/blog/">blog </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Maven Packaging 类型详解</h1> <p class="post-meta"> Created on August 01, 2026 </p> <p class="post-tags"> <a href="/tangerine-docs/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/tangerine-docs/blog/tag/java"> <i class="fa-solid fa-hashtag fa-sm"></i> java</a>   <a href="/tangerine-docs/blog/tag/maven"> <i class="fa-solid fa-hashtag fa-sm"></i> maven</a>   <a href="/tangerine-docs/blog/tag/%E6%9E%84%E5%BB%BA%E5%B7%A5%E5%85%B7"> <i class="fa-solid fa-hashtag fa-sm"></i> 构建工具</a>   ·   <a href="/tangerine-docs/blog/category/%E7%AC%94%E8%AE%B0"> <i class="fa-solid fa-tag fa-sm"></i> 笔记</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <p>Maven 的 <code class="language-plaintext highlighter-rouge">&lt;packaging&gt;</code> 元素决定了项目的构建产物类型。它直接影响 Maven 的生命周期绑定–不同的 packaging 类型会触发不同的构建步骤。本文逐一介绍各类型。</p> <h2 id="packaging-类型一览">packaging 类型一览</h2> <table> <thead> <tr> <th>类型</th> <th>产物</th> <th>说明</th> </tr> </thead> <tbody> <tr> <td><code class="language-plaintext highlighter-rouge">jar</code></td> <td><code class="language-plaintext highlighter-rouge">.jar</code></td> <td>默认类型，打包 Java 类文件</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">pom</code></td> <td>无</td> <td>不产出构件，声明聚合或继承关系</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">war</code></td> <td><code class="language-plaintext highlighter-rouge">.war</code></td> <td>Web 应用，部署到 Servlet 容器</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">ear</code></td> <td><code class="language-plaintext highlighter-rouge">.ear</code></td> <td>Java EE 企业应用，包含多个模块</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">maven-plugin</code></td> <td><code class="language-plaintext highlighter-rouge">.jar</code></td> <td>Maven 插件，包含 Mojo 实现</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">ejb</code></td> <td><code class="language-plaintext highlighter-rouge">.jar</code></td> <td>EJB 打包（现代项目已少用）</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">rar</code></td> <td><code class="language-plaintext highlighter-rouge">.rar</code></td> <td>资源适配器，连接外部 EIS</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">bundle</code></td> <td><code class="language-plaintext highlighter-rouge">.jar</code></td> <td>OSGi bundle（需 maven-bundle-plugin）</td> </tr> </tbody> </table> <hr> <h2 id="1-jar默认">1. jar（默认）</h2> <p>最常用的类型。如果不显式指定 <code class="language-plaintext highlighter-rouge">&lt;packaging&gt;</code>，Maven 默认就是 <code class="language-plaintext highlighter-rouge">jar</code>。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-lib<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>jar<span class="nt">&lt;/packaging&gt;</span> <span class="c">&lt;!-- 可省略，默认就是 jar --&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <p><strong>绑定的生命周期阶段：</strong></p> <ul> <li> <code class="language-plaintext highlighter-rouge">process-classes</code> -&gt; maven-compiler-plugin 编译</li> <li> <code class="language-plaintext highlighter-rouge">package</code> -&gt; maven-jar-plugin 打包成 <code class="language-plaintext highlighter-rouge">.jar</code> </li> <li> <code class="language-plaintext highlighter-rouge">install</code> -&gt; 安装到本地仓库</li> </ul> <hr> <h2 id="2-pom">2. pom</h2> <p><code class="language-plaintext highlighter-rouge">pom</code> 类型不产出任何构件。它用在两个场景：</p> <h3 id="21-聚合多模块项目">2.1 聚合（多模块项目）</h3> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-project<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>pom<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;modules&gt;</span>
+        <span class="nt">&lt;module&gt;</span>my-domain<span class="nt">&lt;/module&gt;</span>
+        <span class="nt">&lt;module&gt;</span>my-web<span class="nt">&lt;/module&gt;</span>
+        <span class="nt">&lt;module&gt;</span>my-service<span class="nt">&lt;/module&gt;</span>
+    <span class="nt">&lt;/modules&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <p>父 POM 声明 <code class="language-plaintext highlighter-rouge">pom</code> 类型后，<code class="language-plaintext highlighter-rouge">mvn install</code> 会依次构建所有子模块。</p> <h3 id="22-继承父-pom-共享配置">2.2 继承（父 POM 共享配置）</h3> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 父 POM --&gt;</span>
+<span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-parent<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>pom<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;properties&gt;</span>
+        <span class="nt">&lt;java.version&gt;</span>17<span class="nt">&lt;/java.version&gt;</span>
+        <span class="nt">&lt;maven.compiler.source&gt;</span>17<span class="nt">&lt;/maven.compiler.source&gt;</span>
+        <span class="nt">&lt;maven.compiler.target&gt;</span>17<span class="nt">&lt;/maven.compiler.target&gt;</span>
+    <span class="nt">&lt;/properties&gt;</span>
+
+    <span class="nt">&lt;dependencyManagement&gt;</span>
+        <span class="nt">&lt;dependencies&gt;</span>
+            <span class="nt">&lt;dependency&gt;</span>
+                <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+                <span class="nt">&lt;artifactId&gt;</span>spring-boot-dependencies<span class="nt">&lt;/artifactId&gt;</span>
+                <span class="nt">&lt;version&gt;</span>3.2.0<span class="nt">&lt;/version&gt;</span>
+                <span class="nt">&lt;type&gt;</span>pom<span class="nt">&lt;/type&gt;</span>
+                <span class="nt">&lt;scope&gt;</span>import<span class="nt">&lt;/scope&gt;</span>
+            <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;/dependencies&gt;</span>
+    <span class="nt">&lt;/dependencyManagement&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <p>子模块继承父 POM：</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;parent&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>my-parent<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/parent&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-domain<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="c">&lt;!-- packaging 默认 jar --&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <blockquote> <p><strong>关键点</strong>：<code class="language-plaintext highlighter-rouge">pom</code> 类型的项目只运行 <code class="language-plaintext highlighter-rouge">install</code>/<code class="language-plaintext highlighter-rouge">deploy</code> 来安装或发布 POM 文件本身，不执行编译和打包。</p> </blockquote> <hr> <h2 id="3-war">3. war</h2> <p>Web 应用归档，部署到 Tomcat、Jetty 等 Servlet 容器。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-web<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>war<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>jakarta.servlet<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>jakarta.servlet-api<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>6.0.0<span class="nt">&lt;/version&gt;</span>
+            <span class="nt">&lt;scope&gt;</span>provided<span class="nt">&lt;/scope&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <p><strong>与 jar 的区别：</strong></p> <ul> <li>额外绑定 <code class="language-plaintext highlighter-rouge">maven-war-plugin</code>，将编译结果连同 <code class="language-plaintext highlighter-rouge">src/main/webapp/</code> 下的内容一起打包</li> <li>产物结构符合 WAR 规范：<code class="language-plaintext highlighter-rouge">WEB-INF/classes/</code>、<code class="language-plaintext highlighter-rouge">WEB-INF/lib/</code>、<code class="language-plaintext highlighter-rouge">WEB-INF/web.xml</code> </li> </ul> <p><strong>目录结构：</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>my-web/
+├── src/
+│   ├── main/
+│   │   ├── java/          # Java 源码
+│   │   ├── resources/     # 配置文件
+│   │   └── webapp/        # Web 资源
+│   │       ├── WEB-INF/
+│   │       │   └── web.xml
+│   │       ├── index.html
+│   │       └── static/
+│   └── test/
+└── pom.xml
+</code></pre></div></div> <blockquote> <p><strong>Spring Boot 提示</strong>：Spring Boot 项目通常用 <code class="language-plaintext highlighter-rouge">jar</code>（内嵌容器），只有需要部署到外部 Tomcat 时才用 <code class="language-plaintext highlighter-rouge">war</code>。切换时还需要将启动类继承 <code class="language-plaintext highlighter-rouge">SpringBootServletInitializer</code>。</p> </blockquote> <hr> <h2 id="4-ear">4. ear</h2> <p>企业级应用归档，把多个 <code class="language-plaintext highlighter-rouge">war</code>、<code class="language-plaintext highlighter-rouge">jar</code>、<code class="language-plaintext highlighter-rouge">ejb</code> 等模块组装成一个 <code class="language-plaintext highlighter-rouge">.ear</code> 文件，部署到 Java EE 应用服务器（如 WildFly、WebLogic）。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-ear<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>ear<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>my-web<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+            <span class="nt">&lt;type&gt;</span>war<span class="nt">&lt;/type&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>my-service<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+            <span class="nt">&lt;type&gt;</span>jar<span class="nt">&lt;/type&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+
+    <span class="nt">&lt;build&gt;</span>
+        <span class="nt">&lt;plugins&gt;</span>
+            <span class="nt">&lt;plugin&gt;</span>
+                <span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+                <span class="nt">&lt;artifactId&gt;</span>maven-ear-plugin<span class="nt">&lt;/artifactId&gt;</span>
+                <span class="nt">&lt;version&gt;</span>3.3.0<span class="nt">&lt;/version&gt;</span>
+                <span class="nt">&lt;configuration&gt;</span>
+                    <span class="nt">&lt;generateApplicationXml&gt;</span>true<span class="nt">&lt;/generateApplicationXml&gt;</span>
+                <span class="nt">&lt;/configuration&gt;</span>
+            <span class="nt">&lt;/plugin&gt;</span>
+        <span class="nt">&lt;/plugins&gt;</span>
+    <span class="nt">&lt;/build&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <blockquote> <p><strong>现代项目少用</strong>：微服务架构下，EAR 已不常见。了解即可。</p> </blockquote> <hr> <h2 id="5-maven-plugin">5. maven-plugin</h2> <p>开发自定义 Maven 插件时的类型。产物是 <code class="language-plaintext highlighter-rouge">.jar</code>，但内部包含 Mojo 类（带 <code class="language-plaintext highlighter-rouge">@Mojo</code> 注解的插件目标实现）。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>maven-plugin<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.apache.maven<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>maven-plugin-api<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>3.9.6<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugin-tools<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>maven-plugin-annotations<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>3.11.0<span class="nt">&lt;/version&gt;</span>
+            <span class="nt">&lt;scope&gt;</span>provided<span class="nt">&lt;/scope&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <p>一个简单的 Mojo：</p> <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Mojo</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"greet"</span><span class="o">,</span> <span class="n">defaultPhase</span> <span class="o">=</span> <span class="nc">LifecyclePhase</span><span class="o">.</span><span class="na">PACKAGE</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GreetMojo</span> <span class="kd">extends</span> <span class="nc">AbstractMojo</span> <span class="o">{</span>
+    <span class="nd">@Parameter</span><span class="o">(</span><span class="n">property</span> <span class="o">=</span> <span class="s">"greet.name"</span><span class="o">,</span> <span class="n">defaultValue</span> <span class="o">=</span> <span class="s">"Tangerine"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">MojoExecutionException</span> <span class="o">{</span>
+        <span class="n">getLog</span><span class="o">().</span><span class="na">info</span><span class="o">(</span><span class="s">"Hello, "</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">"!"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div> <p>使用方式：</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mvn com.tangerine:my-maven-plugin:1.0.0:greet
+<span class="c"># 或</span>
+mvn com.tangerine:my-maven-plugin:1.0.0:greet <span class="nt">-Dgreet</span>.name<span class="o">=</span>World
+</code></pre></div></div> <blockquote> <p><strong>注意</strong>：<code class="language-plaintext highlighter-rouge">maven-plugin</code> 类型会额外绑定 <code class="language-plaintext highlighter-rouge">maven-plugin-plugin</code>，生成插件描述符和文档。</p> </blockquote> <hr> <h2 id="6-ejb">6. ejb</h2> <p>EJB 打包，产物是 <code class="language-plaintext highlighter-rouge">.jar</code>，但会额外生成 EJB 部署描述符。现代项目（Jakarta EE 9+）已基本不需要这个类型，直接用 <code class="language-plaintext highlighter-rouge">jar</code> 配合注解即可。</p> <hr> <h2 id="7-rar">7. rar</h2> <p>资源适配器归档（Resource Adapter Archive），用于连接外部企业信息系统（EIS），如 SAP、CICS 等。部署到 Java EE 应用服务器。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-rar<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>rar<span class="nt">&lt;/packaging&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <blockquote> <p>使用场景非常窄，除非你在做 JCA 连接器开发，否则不会遇到。</p> </blockquote> <hr> <h2 id="8-bundleosgi">8. bundle（OSGi）</h2> <p>不是 Maven 内置类型，需要 <code class="language-plaintext highlighter-rouge">maven-bundle-plugin</code> 支持。打包出符合 OSGi 规范的 JAR（包含特殊的 <code class="language-plaintext highlighter-rouge">MANIFEST.MF</code>）。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-bundle<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>bundle<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;build&gt;</span>
+        <span class="nt">&lt;plugins&gt;</span>
+            <span class="nt">&lt;plugin&gt;</span>
+                <span class="nt">&lt;groupId&gt;</span>org.apache.felix<span class="nt">&lt;/groupId&gt;</span>
+                <span class="nt">&lt;artifactId&gt;</span>maven-bundle-plugin<span class="nt">&lt;/artifactId&gt;</span>
+                <span class="nt">&lt;version&gt;</span>5.1.9<span class="nt">&lt;/version&gt;</span>
+                <span class="nt">&lt;extensions&gt;</span>true<span class="nt">&lt;/extensions&gt;</span>
+                <span class="nt">&lt;configuration&gt;</span>
+                    <span class="nt">&lt;instructions&gt;</span>
+                        <span class="nt">&lt;Bundle-SymbolicName&gt;</span>${project.groupId}.${project.artifactId}<span class="nt">&lt;/Bundle-SymbolicName&gt;</span>
+                        <span class="nt">&lt;Export-Package&gt;</span>com.tangerine.api<span class="nt">&lt;/Export-Package&gt;</span>
+                    <span class="nt">&lt;/instructions&gt;</span>
+                <span class="nt">&lt;/configuration&gt;</span>
+            <span class="nt">&lt;/plugin&gt;</span>
+        <span class="nt">&lt;/plugins&gt;</span>
+    <span class="nt">&lt;/build&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <hr> <h2 id="生命周期绑定总结">生命周期绑定总结</h2> <p>不同 packaging 类型绑定的插件不同：</p> <table> <thead> <tr> <th>阶段</th> <th>jar</th> <th>war</th> <th>pom</th> <th>maven-plugin</th> </tr> </thead> <tbody> <tr> <td><code class="language-plaintext highlighter-rouge">compile</code></td> <td>compiler</td> <td>compiler</td> <td>-</td> <td>compiler</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">test</code></td> <td>surefire</td> <td>surefire</td> <td>-</td> <td>surefire</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">package</code></td> <td>jar</td> <td>war</td> <td>-</td> <td>plugin (descriptor) + jar</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">install</code></td> <td>install</td> <td>install</td> <td>install</td> <td>install</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">deploy</code></td> <td>deploy</td> <td>deploy</td> <td>deploy</td> <td>deploy</td> </tr> </tbody> </table> <blockquote> <p><code class="language-plaintext highlighter-rouge">pom</code> 类型跳过编译和打包阶段，只执行 <code class="language-plaintext highlighter-rouge">install</code>/<code class="language-plaintext highlighter-rouge">deploy</code>。 <code class="language-plaintext highlighter-rouge">war</code> 类型在 <code class="language-plaintext highlighter-rouge">package</code> 阶段用 <code class="language-plaintext highlighter-rouge">maven-war-plugin</code> 替代 <code class="language-plaintext highlighter-rouge">maven-jar-plugin</code>。</p> </blockquote> <hr> <h2 id="实际选择指南">实际选择指南</h2> <table> <thead> <tr> <th>场景</th> <th>选择</th> </tr> </thead> <tbody> <tr> <td>普通库/工具类</td> <td><code class="language-plaintext highlighter-rouge">jar</code></td> </tr> <tr> <td>多模块父项目</td> <td><code class="language-plaintext highlighter-rouge">pom</code></td> </tr> <tr> <td>传统 Web 应用（外部 Tomcat）</td> <td><code class="language-plaintext highlighter-rouge">war</code></td> </tr> <tr> <td>Spring Boot 应用（内嵌容器）</td> <td><code class="language-plaintext highlighter-rouge">jar</code></td> </tr> <tr> <td>自定义 Maven 插件</td> <td><code class="language-plaintext highlighter-rouge">maven-plugin</code></td> </tr> <tr> <td>Java EE 企业应用</td> <td> <code class="language-plaintext highlighter-rouge">ear</code>（几乎不用了）</td> </tr> </tbody> </table> <hr> <h2 id="自定义-packaging">自定义 packaging</h2> <p>通过配置 <code class="language-plaintext highlighter-rouge">&lt;extensions&gt;true&lt;/extensions&gt;</code> 的插件，可以注册新的 packaging 类型。例如 <code class="language-plaintext highlighter-rouge">maven-bundle-plugin</code> 注册了 <code class="language-plaintext highlighter-rouge">bundle</code> 类型。核心机制是 <code class="language-plaintext highlighter-rouge">PluginDescriptor</code> 中的 <code class="language-plaintext highlighter-rouge">lifecycleMapping</code>。</p> <hr> <h2 id="总结">总结</h2> <p>Maven 的 packaging 类型本质上是<strong>生命周期绑定的预设方案</strong>。选择正确的类型，Maven 就会自动绑定对应的插件和阶段。日常开发中，<code class="language-plaintext highlighter-rouge">jar</code> 和 <code class="language-plaintext highlighter-rouge">pom</code> 覆盖了 90% 的场景，<code class="language-plaintext highlighter-rouge">war</code> 在传统 Web 项目中常见，其余类型按需使用。</p> <hr> <blockquote> <p>参考：<a href="https://maven.apache.org/pom.html#Packaging" rel="external nofollow noopener" target="_blank">Maven POM Reference - Packaging</a></p> </blockquote> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/tangerine-docs/blog/2026/welcome/">欢迎来到 Tangerine</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/tangerine-docs/blog/2026/git-multi-ssh/">Git 多账号 SSH 配置</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Tangerine . Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/tangerine-docs/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/tangerine-docs/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/tangerine-docs/assets/al_math/js/mathjax-setup.js"></script> <script src="/tangerine-docs/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/tangerine-docs/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/tangerine-docs/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/tangerine-docs/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/tangerine-docs/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/tangerine-docs/assets/al_img_tools/js/zoom.js"></script> <script defer src="/tangerine-docs/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/tangerine-docs/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/tangerine-docs/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/tangerine-docs/";
+    },
+  },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/tangerine-docs/blog/";
+          },
+        },{id: "post-maven-packaging-类型详解",
+        
+          title: "Maven Packaging 类型详解",
+        
+        description: "介绍 Maven 中不同的 packaging 类型及其用途",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/tangerine-docs/blog/2026/maven-packaging-types/";
+          
+        },
+      },{id: "post-欢迎来到-tangerine",
+        
+          title: "欢迎来到 Tangerine",
+        
+        description: "Tangerine 的第一篇博客",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/tangerine-docs/blog/2026/welcome/";
+          
+        },
+      },{id: "post-git-多账号-ssh-配置",
+        
+          title: "Git 多账号 SSH 配置",
+        
+        description: "一台电脑上为多个 GitHub 账号配置不同的 SSH key",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/tangerine-docs/blog/2026/git-multi-ssh/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-cv',
+        title: 'CV',
+        section: 'Socials',
+        handler: () => {
+          window.open("/tangerine-docs/assets/pdf/example_pdf.pdf", "_blank");
+        },
+      },{
+        id: 'social-email',
+        title: 'email',
+        section: 'Socials',
+        handler: () => {
+          window.open("mailto:%79%6F%75@%65%78%61%6D%70%6C%65.%63%6F%6D", "_blank");
+        },
+      },{
+        id: 'social-inspire',
+        title: 'Inspire HEP',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://inspirehep.net/authors/1010907", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/tangerine-docs/feed.xml", "_blank");
+        },
+      },{
+        id: 'social-scholar',
+        title: 'Google Scholar',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://scholar.google.com/citations?user=qc6CJjYAAAAJ", "_blank");
+        },
+      },{
+        id: 'social-custom_social',
+        title: 'Custom_social',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://www.alberteinstein.com/", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/tangerine-docs/assets/al_search/js/shortcut-key.js"></script> </body> </html>

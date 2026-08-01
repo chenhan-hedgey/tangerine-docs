@@ -1,4 +1,179 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://chenhan-hedgey.github.io/tangerine-docs/feed.xml" rel="self" type="application/atom+xml"/><link href="https://chenhan-hedgey.github.io/tangerine-docs/" rel="alternate" type="text/html" hreflang="zh"/><updated>2026-08-01T18:16:28+00:00</updated><id>https://chenhan-hedgey.github.io/tangerine-docs/feed.xml</id><title type="html">Tangerine</title><subtitle>个人回顾记录。 </subtitle><entry><title type="html">Git 多账号 SSH 配置</title><link href="https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/git-multi-ssh/" rel="alternate" type="text/html" title="Git 多账号 SSH 配置"/><published>2026-08-01T00:00:00+00:00</published><updated>2026-08-01T00:00:00+00:00</updated><id>https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/git-multi-ssh</id><content type="html" xml:base="https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/git-multi-ssh/"><![CDATA[<h1 id="git-多账号-ssh-配置">Git 多账号 SSH 配置</h1> <h2 id="背景">背景</h2> <p>一台电脑上有多个 GitHub 账号时，需要为每个账号配置独立的 SSH key。</p> <h2 id="步骤">步骤</h2> <h3 id="1-为每个账号生成-ssh-key">1. 为每个账号生成 SSH key</h3> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-keygen <span class="nt">-t</span> ed25519 <span class="nt">-C</span> <span class="s2">"账号备注"</span> <span class="nt">-f</span> ~/.ssh/id_ed25519_账号名
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://chenhan-hedgey.github.io/tangerine-docs/feed.xml" rel="self" type="application/atom+xml"/><link href="https://chenhan-hedgey.github.io/tangerine-docs/" rel="alternate" type="text/html" hreflang="zh"/><updated>2026-08-01T18:33:41+00:00</updated><id>https://chenhan-hedgey.github.io/tangerine-docs/feed.xml</id><title type="html">Tangerine</title><subtitle>个人回顾记录。 </subtitle><entry><title type="html">Maven Packaging 类型详解</title><link href="https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/maven-packaging-types/" rel="alternate" type="text/html" title="Maven Packaging 类型详解"/><published>2026-08-01T15:30:00+00:00</published><updated>2026-08-01T15:30:00+00:00</updated><id>https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/maven-packaging-types</id><content type="html" xml:base="https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/maven-packaging-types/"><![CDATA[<p>Maven 的 <code class="language-plaintext highlighter-rouge">&lt;packaging&gt;</code> 元素决定了项目的构建产物类型。它直接影响 Maven 的生命周期绑定–不同的 packaging 类型会触发不同的构建步骤。本文逐一介绍各类型。</p> <h2 id="packaging-类型一览">packaging 类型一览</h2> <table> <thead> <tr> <th>类型</th> <th>产物</th> <th>说明</th> </tr> </thead> <tbody> <tr> <td><code class="language-plaintext highlighter-rouge">jar</code></td> <td><code class="language-plaintext highlighter-rouge">.jar</code></td> <td>默认类型，打包 Java 类文件</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">pom</code></td> <td>无</td> <td>不产出构件，声明聚合或继承关系</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">war</code></td> <td><code class="language-plaintext highlighter-rouge">.war</code></td> <td>Web 应用，部署到 Servlet 容器</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">ear</code></td> <td><code class="language-plaintext highlighter-rouge">.ear</code></td> <td>Java EE 企业应用，包含多个模块</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">maven-plugin</code></td> <td><code class="language-plaintext highlighter-rouge">.jar</code></td> <td>Maven 插件，包含 Mojo 实现</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">ejb</code></td> <td><code class="language-plaintext highlighter-rouge">.jar</code></td> <td>EJB 打包（现代项目已少用）</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">rar</code></td> <td><code class="language-plaintext highlighter-rouge">.rar</code></td> <td>资源适配器，连接外部 EIS</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">bundle</code></td> <td><code class="language-plaintext highlighter-rouge">.jar</code></td> <td>OSGi bundle（需 maven-bundle-plugin）</td> </tr> </tbody> </table> <hr/> <h2 id="1-jar默认">1. jar（默认）</h2> <p>最常用的类型。如果不显式指定 <code class="language-plaintext highlighter-rouge">&lt;packaging&gt;</code>，Maven 默认就是 <code class="language-plaintext highlighter-rouge">jar</code>。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-lib<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>jar<span class="nt">&lt;/packaging&gt;</span> <span class="c">&lt;!-- 可省略，默认就是 jar --&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <p><strong>绑定的生命周期阶段：</strong></p> <ul> <li><code class="language-plaintext highlighter-rouge">process-classes</code> -&gt; maven-compiler-plugin 编译</li> <li><code class="language-plaintext highlighter-rouge">package</code> -&gt; maven-jar-plugin 打包成 <code class="language-plaintext highlighter-rouge">.jar</code></li> <li><code class="language-plaintext highlighter-rouge">install</code> -&gt; 安装到本地仓库</li> </ul> <hr/> <h2 id="2-pom">2. pom</h2> <p><code class="language-plaintext highlighter-rouge">pom</code> 类型不产出任何构件。它用在两个场景：</p> <h3 id="21-聚合多模块项目">2.1 聚合（多模块项目）</h3> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-project<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>pom<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;modules&gt;</span>
+        <span class="nt">&lt;module&gt;</span>my-domain<span class="nt">&lt;/module&gt;</span>
+        <span class="nt">&lt;module&gt;</span>my-web<span class="nt">&lt;/module&gt;</span>
+        <span class="nt">&lt;module&gt;</span>my-service<span class="nt">&lt;/module&gt;</span>
+    <span class="nt">&lt;/modules&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <p>父 POM 声明 <code class="language-plaintext highlighter-rouge">pom</code> 类型后，<code class="language-plaintext highlighter-rouge">mvn install</code> 会依次构建所有子模块。</p> <h3 id="22-继承父-pom-共享配置">2.2 继承（父 POM 共享配置）</h3> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 父 POM --&gt;</span>
+<span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-parent<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>pom<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;properties&gt;</span>
+        <span class="nt">&lt;java.version&gt;</span>17<span class="nt">&lt;/java.version&gt;</span>
+        <span class="nt">&lt;maven.compiler.source&gt;</span>17<span class="nt">&lt;/maven.compiler.source&gt;</span>
+        <span class="nt">&lt;maven.compiler.target&gt;</span>17<span class="nt">&lt;/maven.compiler.target&gt;</span>
+    <span class="nt">&lt;/properties&gt;</span>
+
+    <span class="nt">&lt;dependencyManagement&gt;</span>
+        <span class="nt">&lt;dependencies&gt;</span>
+            <span class="nt">&lt;dependency&gt;</span>
+                <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+                <span class="nt">&lt;artifactId&gt;</span>spring-boot-dependencies<span class="nt">&lt;/artifactId&gt;</span>
+                <span class="nt">&lt;version&gt;</span>3.2.0<span class="nt">&lt;/version&gt;</span>
+                <span class="nt">&lt;type&gt;</span>pom<span class="nt">&lt;/type&gt;</span>
+                <span class="nt">&lt;scope&gt;</span>import<span class="nt">&lt;/scope&gt;</span>
+            <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;/dependencies&gt;</span>
+    <span class="nt">&lt;/dependencyManagement&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <p>子模块继承父 POM：</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;parent&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>my-parent<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/parent&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-domain<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="c">&lt;!-- packaging 默认 jar --&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <blockquote> <p><strong>关键点</strong>：<code class="language-plaintext highlighter-rouge">pom</code> 类型的项目只运行 <code class="language-plaintext highlighter-rouge">install</code>/<code class="language-plaintext highlighter-rouge">deploy</code> 来安装或发布 POM 文件本身，不执行编译和打包。</p> </blockquote> <hr/> <h2 id="3-war">3. war</h2> <p>Web 应用归档，部署到 Tomcat、Jetty 等 Servlet 容器。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-web<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>war<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>jakarta.servlet<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>jakarta.servlet-api<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>6.0.0<span class="nt">&lt;/version&gt;</span>
+            <span class="nt">&lt;scope&gt;</span>provided<span class="nt">&lt;/scope&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <p><strong>与 jar 的区别：</strong></p> <ul> <li>额外绑定 <code class="language-plaintext highlighter-rouge">maven-war-plugin</code>，将编译结果连同 <code class="language-plaintext highlighter-rouge">src/main/webapp/</code> 下的内容一起打包</li> <li>产物结构符合 WAR 规范：<code class="language-plaintext highlighter-rouge">WEB-INF/classes/</code>、<code class="language-plaintext highlighter-rouge">WEB-INF/lib/</code>、<code class="language-plaintext highlighter-rouge">WEB-INF/web.xml</code></li> </ul> <p><strong>目录结构：</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>my-web/
+├── src/
+│   ├── main/
+│   │   ├── java/          # Java 源码
+│   │   ├── resources/     # 配置文件
+│   │   └── webapp/        # Web 资源
+│   │       ├── WEB-INF/
+│   │       │   └── web.xml
+│   │       ├── index.html
+│   │       └── static/
+│   └── test/
+└── pom.xml
+</code></pre></div></div> <blockquote> <p><strong>Spring Boot 提示</strong>：Spring Boot 项目通常用 <code class="language-plaintext highlighter-rouge">jar</code>（内嵌容器），只有需要部署到外部 Tomcat 时才用 <code class="language-plaintext highlighter-rouge">war</code>。切换时还需要将启动类继承 <code class="language-plaintext highlighter-rouge">SpringBootServletInitializer</code>。</p> </blockquote> <hr/> <h2 id="4-ear">4. ear</h2> <p>企业级应用归档，把多个 <code class="language-plaintext highlighter-rouge">war</code>、<code class="language-plaintext highlighter-rouge">jar</code>、<code class="language-plaintext highlighter-rouge">ejb</code> 等模块组装成一个 <code class="language-plaintext highlighter-rouge">.ear</code> 文件，部署到 Java EE 应用服务器（如 WildFly、WebLogic）。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-ear<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>ear<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>my-web<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+            <span class="nt">&lt;type&gt;</span>war<span class="nt">&lt;/type&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>my-service<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+            <span class="nt">&lt;type&gt;</span>jar<span class="nt">&lt;/type&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+
+    <span class="nt">&lt;build&gt;</span>
+        <span class="nt">&lt;plugins&gt;</span>
+            <span class="nt">&lt;plugin&gt;</span>
+                <span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+                <span class="nt">&lt;artifactId&gt;</span>maven-ear-plugin<span class="nt">&lt;/artifactId&gt;</span>
+                <span class="nt">&lt;version&gt;</span>3.3.0<span class="nt">&lt;/version&gt;</span>
+                <span class="nt">&lt;configuration&gt;</span>
+                    <span class="nt">&lt;generateApplicationXml&gt;</span>true<span class="nt">&lt;/generateApplicationXml&gt;</span>
+                <span class="nt">&lt;/configuration&gt;</span>
+            <span class="nt">&lt;/plugin&gt;</span>
+        <span class="nt">&lt;/plugins&gt;</span>
+    <span class="nt">&lt;/build&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <blockquote> <p><strong>现代项目少用</strong>：微服务架构下，EAR 已不常见。了解即可。</p> </blockquote> <hr/> <h2 id="5-maven-plugin">5. maven-plugin</h2> <p>开发自定义 Maven 插件时的类型。产物是 <code class="language-plaintext highlighter-rouge">.jar</code>，但内部包含 Mojo 类（带 <code class="language-plaintext highlighter-rouge">@Mojo</code> 注解的插件目标实现）。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>maven-plugin<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.apache.maven<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>maven-plugin-api<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>3.9.6<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugin-tools<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>maven-plugin-annotations<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>3.11.0<span class="nt">&lt;/version&gt;</span>
+            <span class="nt">&lt;scope&gt;</span>provided<span class="nt">&lt;/scope&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <p>一个简单的 Mojo：</p> <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Mojo</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"greet"</span><span class="o">,</span> <span class="n">defaultPhase</span> <span class="o">=</span> <span class="nc">LifecyclePhase</span><span class="o">.</span><span class="na">PACKAGE</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GreetMojo</span> <span class="kd">extends</span> <span class="nc">AbstractMojo</span> <span class="o">{</span>
+    <span class="nd">@Parameter</span><span class="o">(</span><span class="n">property</span> <span class="o">=</span> <span class="s">"greet.name"</span><span class="o">,</span> <span class="n">defaultValue</span> <span class="o">=</span> <span class="s">"Tangerine"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">MojoExecutionException</span> <span class="o">{</span>
+        <span class="n">getLog</span><span class="o">().</span><span class="na">info</span><span class="o">(</span><span class="s">"Hello, "</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">"!"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div> <p>使用方式：</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mvn com.tangerine:my-maven-plugin:1.0.0:greet
+<span class="c"># 或</span>
+mvn com.tangerine:my-maven-plugin:1.0.0:greet <span class="nt">-Dgreet</span>.name<span class="o">=</span>World
+</code></pre></div></div> <blockquote> <p><strong>注意</strong>：<code class="language-plaintext highlighter-rouge">maven-plugin</code> 类型会额外绑定 <code class="language-plaintext highlighter-rouge">maven-plugin-plugin</code>，生成插件描述符和文档。</p> </blockquote> <hr/> <h2 id="6-ejb">6. ejb</h2> <p>EJB 打包，产物是 <code class="language-plaintext highlighter-rouge">.jar</code>，但会额外生成 EJB 部署描述符。现代项目（Jakarta EE 9+）已基本不需要这个类型，直接用 <code class="language-plaintext highlighter-rouge">jar</code> 配合注解即可。</p> <hr/> <h2 id="7-rar">7. rar</h2> <p>资源适配器归档（Resource Adapter Archive），用于连接外部企业信息系统（EIS），如 SAP、CICS 等。部署到 Java EE 应用服务器。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-rar<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>rar<span class="nt">&lt;/packaging&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <blockquote> <p>使用场景非常窄，除非你在做 JCA 连接器开发，否则不会遇到。</p> </blockquote> <hr/> <h2 id="8-bundleosgi">8. bundle（OSGi）</h2> <p>不是 Maven 内置类型，需要 <code class="language-plaintext highlighter-rouge">maven-bundle-plugin</code> 支持。打包出符合 OSGi 规范的 JAR（包含特殊的 <code class="language-plaintext highlighter-rouge">MANIFEST.MF</code>）。</p> <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.tangerine<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>my-bundle<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>bundle<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;build&gt;</span>
+        <span class="nt">&lt;plugins&gt;</span>
+            <span class="nt">&lt;plugin&gt;</span>
+                <span class="nt">&lt;groupId&gt;</span>org.apache.felix<span class="nt">&lt;/groupId&gt;</span>
+                <span class="nt">&lt;artifactId&gt;</span>maven-bundle-plugin<span class="nt">&lt;/artifactId&gt;</span>
+                <span class="nt">&lt;version&gt;</span>5.1.9<span class="nt">&lt;/version&gt;</span>
+                <span class="nt">&lt;extensions&gt;</span>true<span class="nt">&lt;/extensions&gt;</span>
+                <span class="nt">&lt;configuration&gt;</span>
+                    <span class="nt">&lt;instructions&gt;</span>
+                        <span class="nt">&lt;Bundle-SymbolicName&gt;</span>${project.groupId}.${project.artifactId}<span class="nt">&lt;/Bundle-SymbolicName&gt;</span>
+                        <span class="nt">&lt;Export-Package&gt;</span>com.tangerine.api<span class="nt">&lt;/Export-Package&gt;</span>
+                    <span class="nt">&lt;/instructions&gt;</span>
+                <span class="nt">&lt;/configuration&gt;</span>
+            <span class="nt">&lt;/plugin&gt;</span>
+        <span class="nt">&lt;/plugins&gt;</span>
+    <span class="nt">&lt;/build&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div> <hr/> <h2 id="生命周期绑定总结">生命周期绑定总结</h2> <p>不同 packaging 类型绑定的插件不同：</p> <table> <thead> <tr> <th>阶段</th> <th>jar</th> <th>war</th> <th>pom</th> <th>maven-plugin</th> </tr> </thead> <tbody> <tr> <td><code class="language-plaintext highlighter-rouge">compile</code></td> <td>compiler</td> <td>compiler</td> <td>-</td> <td>compiler</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">test</code></td> <td>surefire</td> <td>surefire</td> <td>-</td> <td>surefire</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">package</code></td> <td>jar</td> <td>war</td> <td>-</td> <td>plugin (descriptor) + jar</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">install</code></td> <td>install</td> <td>install</td> <td>install</td> <td>install</td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">deploy</code></td> <td>deploy</td> <td>deploy</td> <td>deploy</td> <td>deploy</td> </tr> </tbody> </table> <blockquote> <p><code class="language-plaintext highlighter-rouge">pom</code> 类型跳过编译和打包阶段，只执行 <code class="language-plaintext highlighter-rouge">install</code>/<code class="language-plaintext highlighter-rouge">deploy</code>。 <code class="language-plaintext highlighter-rouge">war</code> 类型在 <code class="language-plaintext highlighter-rouge">package</code> 阶段用 <code class="language-plaintext highlighter-rouge">maven-war-plugin</code> 替代 <code class="language-plaintext highlighter-rouge">maven-jar-plugin</code>。</p> </blockquote> <hr/> <h2 id="实际选择指南">实际选择指南</h2> <table> <thead> <tr> <th>场景</th> <th>选择</th> </tr> </thead> <tbody> <tr> <td>普通库/工具类</td> <td><code class="language-plaintext highlighter-rouge">jar</code></td> </tr> <tr> <td>多模块父项目</td> <td><code class="language-plaintext highlighter-rouge">pom</code></td> </tr> <tr> <td>传统 Web 应用（外部 Tomcat）</td> <td><code class="language-plaintext highlighter-rouge">war</code></td> </tr> <tr> <td>Spring Boot 应用（内嵌容器）</td> <td><code class="language-plaintext highlighter-rouge">jar</code></td> </tr> <tr> <td>自定义 Maven 插件</td> <td><code class="language-plaintext highlighter-rouge">maven-plugin</code></td> </tr> <tr> <td>Java EE 企业应用</td> <td><code class="language-plaintext highlighter-rouge">ear</code>（几乎不用了）</td> </tr> </tbody> </table> <hr/> <h2 id="自定义-packaging">自定义 packaging</h2> <p>通过配置 <code class="language-plaintext highlighter-rouge">&lt;extensions&gt;true&lt;/extensions&gt;</code> 的插件，可以注册新的 packaging 类型。例如 <code class="language-plaintext highlighter-rouge">maven-bundle-plugin</code> 注册了 <code class="language-plaintext highlighter-rouge">bundle</code> 类型。核心机制是 <code class="language-plaintext highlighter-rouge">PluginDescriptor</code> 中的 <code class="language-plaintext highlighter-rouge">lifecycleMapping</code>。</p> <hr/> <h2 id="总结">总结</h2> <p>Maven 的 packaging 类型本质上是<strong>生命周期绑定的预设方案</strong>。选择正确的类型，Maven 就会自动绑定对应的插件和阶段。日常开发中，<code class="language-plaintext highlighter-rouge">jar</code> 和 <code class="language-plaintext highlighter-rouge">pom</code> 覆盖了 90% 的场景，<code class="language-plaintext highlighter-rouge">war</code> 在传统 Web 项目中常见，其余类型按需使用。</p> <hr/> <blockquote> <p>参考：<a href="https://maven.apache.org/pom.html#Packaging">Maven POM Reference - Packaging</a></p> </blockquote>]]></content><author><name></name></author><category term="笔记"/><category term="java"/><category term="maven"/><category term="构建工具"/><summary type="html"><![CDATA[介绍 Maven 中不同的 packaging 类型及其用途]]></summary></entry><entry><title type="html">Git 多账号 SSH 配置</title><link href="https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/git-multi-ssh/" rel="alternate" type="text/html" title="Git 多账号 SSH 配置"/><published>2026-08-01T00:00:00+00:00</published><updated>2026-08-01T00:00:00+00:00</updated><id>https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/git-multi-ssh</id><content type="html" xml:base="https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/git-multi-ssh/"><![CDATA[<h1 id="git-多账号-ssh-配置">Git 多账号 SSH 配置</h1> <h2 id="背景">背景</h2> <p>一台电脑上有多个 GitHub 账号时，需要为每个账号配置独立的 SSH key。</p> <h2 id="步骤">步骤</h2> <h3 id="1-为每个账号生成-ssh-key">1. 为每个账号生成 SSH key</h3> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-keygen <span class="nt">-t</span> ed25519 <span class="nt">-C</span> <span class="s2">"账号备注"</span> <span class="nt">-f</span> ~/.ssh/id_ed25519_账号名
 </code></pre></div></div> <h3 id="2-配置-sshconfig">2. 配置 ~/.ssh/config</h3> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Host github.com
     HostName github.com
     User git
