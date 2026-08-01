@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Maven Packaging 类型详解"
-date: 2026-08-02
+date: 2026-08-01 23:30:00 +0800
 description: "介绍 Maven 中不同的 packaging 类型及其用途"
 tags: java maven 构建工具
 categories: 笔记
