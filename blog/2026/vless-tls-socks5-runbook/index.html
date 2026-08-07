@@ -1,0 +1,274 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> VLESS + TLS + SOCKS5 链式代理：可复现部署与排障 Runbook | Tangerine </title> <meta name="author" content="Tangerine "> <meta name="description" content="面向工程交接的脱敏部署、验证和排障手册"> <meta name="keywords" content="个人博客, 笔记, 回顾记录"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/tangerine-docs/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/tangerine-docs/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%F0%9F%8D%8A&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/tangerine-docs/assets/css/main.css?v=e272beb2a356f3d9abedbe97e457f5c2"> <link rel="canonical" href="https://chenhan-hedgey.github.io/tangerine-docs/blog/2026/vless-tls-socks5-runbook/"> <script src="/tangerine-docs/assets/js/theme.js?v=7af685e2ba20b37fef545c97b8064050"></script> <link defer rel="stylesheet" href="/tangerine-docs/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/tangerine-docs/"> Tangerine </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/tangerine-docs/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/tangerine-docs/blog/">blog </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">VLESS + TLS + SOCKS5 链式代理：可复现部署与排障 Runbook</h1> <p class="post-meta"> Created on August 07, 2026 </p> <p class="post-tags"> <a href="/tangerine-docs/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/tangerine-docs/blog/tag/vless"> <i class="fa-solid fa-hashtag fa-sm"></i> vless</a>   <a href="/tangerine-docs/blog/tag/xray"> <i class="fa-solid fa-hashtag fa-sm"></i> xray</a>   <a href="/tangerine-docs/blog/tag/3x-ui"> <i class="fa-solid fa-hashtag fa-sm"></i> 3x-ui</a>   <a href="/tangerine-docs/blog/tag/cloudflare"> <i class="fa-solid fa-hashtag fa-sm"></i> cloudflare</a>   <a href="/tangerine-docs/blog/tag/clash"> <i class="fa-solid fa-hashtag fa-sm"></i> clash</a>   <a href="/tangerine-docs/blog/tag/socks5"> <i class="fa-solid fa-hashtag fa-sm"></i> socks5</a>   <a href="/tangerine-docs/blog/tag/%E8%BF%90%E7%BB%B4"> <i class="fa-solid fa-hashtag fa-sm"></i> 运维</a>   ·   <a href="/tangerine-docs/blog/category/%E7%AC%94%E8%AE%B0"> <i class="fa-solid fa-tag fa-sm"></i> 笔记</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <p>这是一份面向工程交接的脱敏 Runbook。它描述如何将 Cloudflare DNS、3X-UI/Xray、VLESS + TLS、Clash Verge Rev 和可选的 SOCKS5 链式代理组合起来，并通过可复现的命令定位问题。</p> <p>文中的 &lt;…&gt; 都必须替换为自己的值。不要把真实域名、订阅令牌、面板路径、UUID、私钥或代理凭据提交到仓库。</p> <h2 id="1-版本与边界">1. 版本与边界</h2> <p>本流程在下列版本上验证过：</p> <table> <thead> <tr> <th>组件</th> <th style="text-align: right">版本</th> <th>作用</th> </tr> </thead> <tbody> <tr> <td>3X-UI</td> <td style="text-align: right">3.6</td> <td>管理 Xray 入站、客户端与订阅</td> </tr> <tr> <td>Xray-core</td> <td style="text-align: right">26.7.28</td> <td>服务端代理核心</td> </tr> <tr> <td>Mihomo Meta</td> <td style="text-align: right">1.19.29</td> <td>Clash Verge Rev 的代理核心</td> </tr> <tr> <td>Cloudflare</td> <td style="text-align: right">托管 DNS</td> <td>提供域名解析；本流程的 Xray 入站使用仅 DNS</td> </tr> </tbody> </table> <p>这里的 main 是站点的<strong>源码分支</strong>。推送到 main 后，仓库现有的 GitHub Actions 会构建 Jekyll，并将静态产物发布到 gh-pages。因此不要直接修改 gh-pages 中生成的 HTML。</p> <h2 id="2-目标架构">2. 目标架构</h2> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Clash Verge Rev
+  |
+  +-- VLESS + TLS --&gt; &lt;VPS_IP&gt;:8443
+  |                    |
+  |                    +-- 可选：SOCKS5 --&gt; &lt;RESIDENTIAL_SOCKS_HOST&gt;:&lt;PORT&gt;
+  |
+  +-- HTTPS 订阅 ---&gt; https://&lt;PANEL_HOST&gt;:&lt;PANEL_PORT&gt;/clash/&lt;SUB_TOKEN&gt;
+
+Cloudflare DNS（仅 DNS）
+  +-- &lt;PANEL_HOST&gt; A 记录 --&gt; &lt;VPS_IP&gt;
+</code></pre></div></div> <p>如果 SOCKS5 节点使用 dialer-proxy 指向 VLESS 节点，SOCKS5 服务看到的来源地址是 VPS 的出口地址，而不是运行 Clash 的个人电脑。这一点对使用来源 IP 白名单的住宅代理尤其重要。</p> <h2 id="3-部署前检查">3. 部署前检查</h2> <p>准备以下参数：</p> <table> <thead> <tr> <th>参数</th> <th>示例占位符</th> <th>说明</th> </tr> </thead> <tbody> <tr> <td>VPS 公网地址</td> <td><vps_ip></vps_ip></td> <td>可 SSH 管理的 Linux 主机</td> </tr> <tr> <td>面板域名</td> <td><panel_host></panel_host></td> <td>例如 panel.example.com</td> </tr> <tr> <td>面板端口</td> <td><panel_port></panel_port></td> <td>例如 54321</td> </tr> <tr> <td>TLS 入站端口</td> <td><tls_port></tls_port></td> <td>本文使用 8443</td> </tr> <tr> <td>TLS 客户端别名</td> <td><tls_client_name></tls_client_name></td> <td>例如 US-TLS-primary</td> </tr> <tr> <td>SOCKS5 服务</td> <td><socks_host>:<socks_port></socks_port></socks_host></td> <td>由服务商提供</td> </tr> </tbody> </table> <p>确认 DNS 解析指向 VPS：</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dig +short &lt;PANEL_HOST&gt;
+</code></pre></div></div> <p>预期：返回 <vps_ip>。用于 Xray/3X-UI 入站的记录必须设置为 Cloudflare **仅 DNS**（灰云）；若启用了代理，非 HTTP 的入站端口通常无法正常工作。</vps_ip></p> <p>在云厂商安全组或防火墙中放行：</p> <ul> <li>TCP <panel_port>：仅管理来源；不要向公网开放。</panel_port> </li> <li>TCP <tls_port>：供 VLESS + TLS 客户端使用。</tls_port> </li> <li>TCP 80：首次 HTTP-01 证书签发时需要；使用 DNS-01 时按 DNS API 权限配置。</li> </ul> <h2 id="4-证书与-vless--tls-入站">4. 证书与 VLESS + TLS 入站</h2> <p>先通过 3X-UI 的证书管理/ACME 功能为 <panel_host> 申请证书。以下是常见的证书文件约定：</panel_host></p> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/root/cert/&lt;PANEL_HOST&gt;/fullchain.pem
+/root/cert/&lt;PANEL_HOST&gt;/privkey.pem
+</code></pre></div></div> <p>然后创建一个独立的 VLESS 入站，关键参数如下：</p> <table> <thead> <tr> <th>字段</th> <th>值</th> </tr> </thead> <tbody> <tr> <td>协议</td> <td>vless</td> </tr> <tr> <td>传输</td> <td>tcp</td> </tr> <tr> <td>安全</td> <td>tls</td> </tr> <tr> <td>监听端口</td> <td><tls_port></tls_port></td> </tr> <tr> <td>SNI / Server Name</td> <td><panel_host></panel_host></td> </tr> <tr> <td>证书</td> <td>fullchain.pem</td> </tr> <tr> <td>私钥</td> <td>privkey.pem</td> </tr> <tr> <td>客户端 UUID</td> <td>新生成，不与其他入站复用</td> </tr> </tbody> </table> <p>创建后，在 VPS 上验证服务进程、端口和证书：</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl is-active x-ui
+ss <span class="nt">-ltn</span> | <span class="nb">grep</span> <span class="s2">":&lt;TLS_PORT&gt;"</span>
+openssl s_client <span class="nt">-connect</span> 127.0.0.1:&lt;TLS_PORT&gt; <span class="nt">-servername</span> &lt;PANEL_HOST&gt; <span class="nt">-brief</span> &lt;/dev/null
+</code></pre></div></div> <p>预期分别为：</p> <ol> <li>active；</li> <li>Xray 在 <tls_port> 监听；</tls_port> </li> <li>输出中出现 Peer certificate，且证书主体是 <panel_host>。</panel_host> </li> </ol> <h2 id="5-生成-clash-yaml-订阅">5. 生成 Clash YAML 订阅</h2> <p>3X-UI 的普通订阅端点可能返回 Base64 编码的 URI 列表，适合某些客户端，但不能直接作为 Clash 配置导入。Clash Verge Rev 需要的是 YAML。</p> <p>在 3X-UI 中启用 Clash 订阅后，使用类似下面的 URL：</p> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://&lt;PANEL_HOST&gt;:&lt;PANEL_PORT&gt;/clash/&lt;SUB_TOKEN&gt;
+</code></pre></div></div> <p>在 VPS 或任意可信终端检查内容：</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-fsSL</span> <span class="s2">"https://&lt;PANEL_HOST&gt;:&lt;PANEL_PORT&gt;/clash/&lt;SUB_TOKEN&gt;"</span> | <span class="nb">sed</span> <span class="nt">-n</span> <span class="s1">'1,80p'</span>
+</code></pre></div></div> <p>预期内容以 proxies: 开始，并包含 TLS 节点，例如：</p> <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">proxies</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">&lt;TLS_CLIENT_NAME&gt;</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">vless</span>
+    <span class="na">server</span><span class="pi">:</span> <span class="s">&lt;PANEL_HOST&gt;</span>
+    <span class="na">port</span><span class="pi">:</span> <span class="s">&lt;TLS_PORT&gt;</span>
+    <span class="na">network</span><span class="pi">:</span> <span class="s">tcp</span>
+    <span class="na">tls</span><span class="pi">:</span> <span class="kc">true</span>
+    <span class="na">servername</span><span class="pi">:</span> <span class="s">&lt;PANEL_HOST&gt;</span>
+</code></pre></div></div> <p>将此 URL 作为订阅地址导入 Clash Verge Rev。</p> <h2 id="6-多订阅与配置文件脚本">6. 多订阅与配置文件脚本</h2> <p>Clash Verge Rev 的“全局扩展脚本”会作用于每一份订阅。若脚本引用了只存在于订阅 A 的节点，而订阅 B 没有该节点，验证将出现类似错误：</p> <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>proxy [&lt;NODE_NAME&gt;] dialer-proxy [&lt;MISSING_NODE&gt;] not found
+</code></pre></div></div> <p>正确做法是：</p> <ol> <li>将仅属于订阅 A 的脚本放入订阅 A 的<strong>配置文件脚本</strong>。</li> <li>将订阅 B 的脚本放入订阅 B 的<strong>配置文件脚本</strong>。</li> <li>全局脚本保持空操作，或仅放置不依赖任一订阅节点的通用规则。</li> </ol> <p>下面模板将 SOCKS5 节点注入最新订阅的 PROXY 组，并让它经 TLS 节点出站：</p> <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">main</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span> <span class="nx">profileName</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">node</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">residential-socks</span><span class="dl">"</span><span class="p">,</span>
+    <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">socks5</span><span class="dl">"</span><span class="p">,</span>
+    <span class="na">server</span><span class="p">:</span> <span class="dl">"</span><span class="s2">&lt;RESIDENTIAL_SOCKS_HOST&gt;</span><span class="dl">"</span><span class="p">,</span>
+    <span class="na">port</span><span class="p">:</span> <span class="o">&lt;</span><span class="nx">RESIDENTIAL_SOCKS_PORT</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="na">username</span><span class="p">:</span> <span class="dl">"</span><span class="s2">&lt;RESIDENTIAL_SOCKS_USERNAME&gt;</span><span class="dl">"</span><span class="p">,</span>
+    <span class="na">password</span><span class="p">:</span> <span class="dl">"</span><span class="s2">&lt;RESIDENTIAL_SOCKS_PASSWORD&gt;</span><span class="dl">"</span><span class="p">,</span>
+    <span class="na">udp</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">dialer-proxy</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">&lt;TLS_CLIENT_NAME&gt;</span><span class="dl">"</span>
+  <span class="p">};</span>
+
+  <span class="nx">config</span><span class="p">.</span><span class="nx">proxies</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">proxies</span> <span class="o">||</span> <span class="p">[];</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">config</span><span class="p">.</span><span class="nx">proxies</span><span class="p">.</span><span class="nf">some</span><span class="p">((</span><span class="nx">proxy</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">proxy</span><span class="p">.</span><span class="nx">name</span> <span class="o">===</span> <span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nx">config</span><span class="p">.</span><span class="nx">proxies</span><span class="p">.</span><span class="nf">unshift</span><span class="p">(</span><span class="nx">node</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">group</span> <span class="k">of</span> <span class="nx">config</span><span class="p">[</span><span class="dl">"</span><span class="s2">proxy-groups</span><span class="dl">"</span><span class="p">]</span> <span class="o">||</span> <span class="p">[])</span> <span class="p">{</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">group</span><span class="p">.</span><span class="nx">name</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">PROXY</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">group</span><span class="p">.</span><span class="nx">proxies</span> <span class="o">=</span> <span class="nx">group</span><span class="p">.</span><span class="nx">proxies</span> <span class="o">||</span> <span class="p">[];</span>
+      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">group</span><span class="p">.</span><span class="nx">proxies</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nx">group</span><span class="p">.</span><span class="nx">proxies</span><span class="p">.</span><span class="nf">unshift</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">config</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>组名不是固定的。先打开新订阅的 YAML，确认 proxy-groups 下的真实名称；若它叫 SELECT，则将脚本中的 PROXY 改为 SELECT。不要猜测或跨订阅引用节点名称。</p> <h2 id="7-socks5-的三层验证">7. SOCKS5 的三层验证</h2> <p>从 VPS 验证最有意义，因为它模拟了 dialer-proxy 的真实来源。以下命令会提示输入凭据，避免密码留在 shell 历史中：</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 - <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">PY</span><span class="sh">'
+import getpass
+import socket
+import struct
+
+HOST, PORT = "&lt;RESIDENTIAL_SOCKS_HOST&gt;", &lt;RESIDENTIAL_SOCKS_PORT&gt;
+
+def receive_exact(sock, size):
+    data = b""
+    while len(data) &lt; size:
+        part = sock.recv(size - len(data))
+        if not part:
+            raise RuntimeError("connection closed by peer")
+        data += part
+    return data
+
+username = input("SOCKS username: ").encode()
+password = getpass.getpass("SOCKS password: ").encode()
+
+sock = socket.create_connection((HOST, PORT), timeout=15)
+sock.settimeout(20)
+print("1. TCP: OK")
+
+sock.sendall(bytes([5, 1, 2]))
+if receive_exact(sock, 2) != bytes([5, 2]):
+    raise RuntimeError("unexpected SOCKS5 authentication method")
+print("2. SOCKS5 method: username/password")
+
+sock.sendall(bytes([1, len(username)]) + username + bytes([len(password)]) + password)
+if receive_exact(sock, 2) != bytes([1, 0]):
+    raise RuntimeError("SOCKS5 authentication failed")
+print("3. SOCKS5 authentication: OK")
+
+domain = b"api.ipify.org"
+sock.sendall(bytes([5, 1, 0, 3, len(domain)]) + domain + struct.pack("!H", 80))
+reply = receive_exact(sock, 4)
+if reply[0] != 5 or reply[1] != 0:
+    raise RuntimeError(f"SOCKS5 CONNECT failed: {reply.hex()}")
+
+length = {1: 4, 4: 16}.get(reply[3])
+if length is None and reply[3] == 3:
+    length = receive_exact(sock, 1)[0]
+if length is None:
+    raise RuntimeError("unknown SOCKS5 reply address type")
+receive_exact(sock, length + 2)
+
+sock.sendall(b"GET / HTTP/1.1</span><span class="se">\r\n</span><span class="sh">Host: api.ipify.org</span><span class="se">\r\n</span><span class="sh">Connection: close</span><span class="se">\r\n\r\n</span><span class="sh">")
+print("4. Outbound request: OK")
+print(sock.recv(1024).decode("utf-8", "replace"))
+sock.close()
+</span><span class="no">PY
+</span></code></pre></div></div> <table> <thead> <tr> <th>失败阶段</th> <th>含义</th> <th>下一步</th> </tr> </thead> <tbody> <tr> <td>TCP 超时</td> <td>VPS 到代理入口不通</td> <td>检查服务商入口是否轮换、来源 IP 白名单和网络策略</td> </tr> <tr> <td>TCP 拒绝</td> <td>目标端口关闭</td> <td>向服务商确认最新地址和端口</td> </tr> <tr> <td>SOCKS5 握手异常</td> <td>地址/端口不是预期的 SOCKS5</td> <td>核对协议、端口和服务商文档</td> </tr> <tr> <td>认证失败</td> <td>凭据、套餐或授权失败</td> <td>核对套餐状态、密码和 IP 授权方式</td> </tr> <tr> <td>CONNECT 失败</td> <td>已认证但不能出网</td> <td>检查配额、目标限制和服务商线路</td> </tr> </tbody> </table> <h2 id="8-常见故障">8. 常见故障</h2> <h3 id="81-expected-a-yaml-mapping">8.1 expected a YAML mapping</h3> <p>导入了普通 Base64 订阅，而不是 Clash YAML 订阅。改用 /clash/<sub_token> 类型的订阅端点，并确认响应以 proxies: 开始。</sub_token></p> <h3 id="82-dialer-proxy-not-found">8.2 dialer-proxy not found</h3> <p>配置文件脚本中引用的节点不存在于当前订阅。检查组名和节点名，并将脚本从全局范围移到对应订阅的配置文件范围。</p> <h3 id="83-reality-authentication-failed">8.3 REALITY authentication failed</h3> <p>优先比对服务器和客户端的 UUID、SNI、Short ID、Public Key、传输类型与流控参数。若仍无法稳定互通，部署一个独立的 VLESS + TLS 入站作为兼容路径；TLS 使用标准证书，排障面更小。</p> <h3 id="84-住宅代理以前可用现在-tcp-超时">8.4 住宅代理以前可用、现在 TCP 超时</h3> <p>通常不是 Clash 脚本问题。住宅代理服务商可能轮换入口地址，或根据来源 IP、套餐状态和网络策略限制访问。先在 VPS 上运行三层验证，再向服务商确认当前入口、端口、认证方式和是否需要将 <vps_ip> 加入白名单。</vps_ip></p> <h2 id="9-交接清单">9. 交接清单</h2> <ul class="task-list"> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>记录组件版本与升级日期。</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>记录所有端口的用途和云防火墙规则。</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>将证书路径、续期方式和到期提醒写入内部密码库或运维系统。</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>保存订阅 URL 的存放位置，不把令牌写进文档。</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>分别记录每个订阅的配置文件脚本用途和依赖节点。</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>对 SOCKS5 服务记录供应商、当前入口、套餐到期时间和授权模型。</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>在入口变更、升级 Xray 或修改传输协议后，重跑第 4、5、7 节的验证。</li> </ul> <p>这份流程将“服务是否存活”“订阅格式是否正确”“客户端配置是否引用了有效节点”“住宅代理是否允许 VPS 来源”拆分验证。只有先定位到失败层，才能避免把网络、订阅和凭据问题混为一谈。</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/tangerine-docs/blog/2026/maven-packaging-types/">Maven Packaging 类型详解</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/tangerine-docs/blog/2026/welcome/">欢迎来到 Tangerine</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/tangerine-docs/blog/2026/git-multi-ssh/">Git 多账号 SSH 配置</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Tangerine . Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/tangerine-docs/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/tangerine-docs/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/tangerine-docs/assets/al_math/js/mathjax-setup.js"></script> <script src="/tangerine-docs/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/tangerine-docs/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/tangerine-docs/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/tangerine-docs/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/tangerine-docs/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/tangerine-docs/assets/al_img_tools/js/zoom.js"></script> <script defer src="/tangerine-docs/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/tangerine-docs/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/tangerine-docs/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/tangerine-docs/";
+    },
+  },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/tangerine-docs/blog/";
+          },
+        },{id: "post-vless-tls-socks5-链式代理-可复现部署与排障-runbook",
+        
+          title: "VLESS + TLS + SOCKS5 链式代理：可复现部署与排障 Runbook",
+        
+        description: "面向工程交接的脱敏部署、验证和排障手册",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/tangerine-docs/blog/2026/vless-tls-socks5-runbook/";
+          
+        },
+      },{id: "post-maven-packaging-类型详解",
+        
+          title: "Maven Packaging 类型详解",
+        
+        description: "介绍 Maven 中不同的 packaging 类型及其用途",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/tangerine-docs/blog/2026/maven-packaging-types/";
+          
+        },
+      },{id: "post-欢迎来到-tangerine",
+        
+          title: "欢迎来到 Tangerine",
+        
+        description: "Tangerine 的第一篇博客",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/tangerine-docs/blog/2026/welcome/";
+          
+        },
+      },{id: "post-git-多账号-ssh-配置",
+        
+          title: "Git 多账号 SSH 配置",
+        
+        description: "一台电脑上为多个 GitHub 账号配置不同的 SSH key",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/tangerine-docs/blog/2026/git-multi-ssh/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-cv',
+        title: 'CV',
+        section: 'Socials',
+        handler: () => {
+          window.open("/tangerine-docs/assets/pdf/example_pdf.pdf", "_blank");
+        },
+      },{
+        id: 'social-email',
+        title: 'email',
+        section: 'Socials',
+        handler: () => {
+          window.open("mailto:%79%6F%75@%65%78%61%6D%70%6C%65.%63%6F%6D", "_blank");
+        },
+      },{
+        id: 'social-inspire',
+        title: 'Inspire HEP',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://inspirehep.net/authors/1010907", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/tangerine-docs/feed.xml", "_blank");
+        },
+      },{
+        id: 'social-scholar',
+        title: 'Google Scholar',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://scholar.google.com/citations?user=qc6CJjYAAAAJ", "_blank");
+        },
+      },{
+        id: 'social-custom_social',
+        title: 'Custom_social',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://www.alberteinstein.com/", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/tangerine-docs/assets/al_search/js/shortcut-key.js"></script> </body> </html>
